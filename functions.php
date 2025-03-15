@@ -11,8 +11,9 @@ function registerUser($name, $email, $password) {
     if ($checkemail->num_rows > 0) {
         return "Email already exists!";
     }
-    $sql = "INSERT INTO users (name, email, password) VALUES ('$name', '$email', '$hashedPassword')";
-    if ($connection->query($sql) === TRUE) {
+    $sql = $connection->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
+    $sql->bind_param("sss", $name, $email, $hashedPassword);
+    if ($sql->execute()) {
         $_SESSION["success_message"] = "User registered successfully! Please login to continue."; 
         header("Location: index.php");
         exit();
@@ -97,10 +98,7 @@ function getFavouriteMovies($userId) {
     $favouritequery = $connection->prepare("SELECT movie_id, movie_title, thumbnail, movie_year, movie_type FROM favorite_movies WHERE user_id = ?");
     $favouritequery->bind_param("i", $userId);
 
-    // Execute the statement
     $favouritequery->execute();
-
-    // Fetch the results
     $result = $favouritequery->get_result();
     $favorites = $result->fetch_all(MYSQLI_ASSOC);
 
