@@ -65,7 +65,16 @@ function getMovies($searchQuery = "", $page = 1) {
     $apiKey = "fd3dbafa"; 
     $apiUrl = "http://www.omdbapi.com/?apikey=$apiKey&s=" . urlencode($searchQuery) . "&page=$page";
 
-    $response = file_get_contents($apiUrl);
+    $options = [
+        "http" => [
+            "method" => "GET",
+            "timeout" => 10 // Increase timeout to 10 seconds
+        ]
+    ];
+    
+    $context = stream_context_create($options);
+    
+    $response = file_get_contents($apiUrl, false, $context);
     if ($response === false) {
         return [
             'movies' => [],
